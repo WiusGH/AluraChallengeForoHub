@@ -3,6 +3,8 @@ package com.alurachallenge.forohub.forohub.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity(name = "Topic")
 @Table(name = "topic")
 @Getter
@@ -14,13 +16,15 @@ public class Topic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String topicId;
+    @Column(name = "topic_id")
+    private Long topicId;
     private String title;
     private String message;
-    private String date;
+    private LocalDate date;
     private boolean status;
     private String course;
-    private String createdAt;
+    private LocalDate createdAt;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
