@@ -96,4 +96,56 @@ public class TopicController {
         return ResponseEntity.ok(topics);
     }
 
+    @GetMapping("/get-topic/{id}")
+    public ResponseEntity<?> getTopic(@PathVariable("id") Long id, Authentication authentication) {
+        String username = authentication.getName();
+
+        UserDetails loggedInUser = userRepository.findByUsername(username);
+        if (loggedInUser == null) {
+            return ResponseEntity.status(403).body("User not found or unauthorized");
+        }
+
+        Topic topic = topicRepository.findById(id).orElse(null);
+        if (topic == null) {
+            return ResponseEntity.status(404).body("Topic not found");
+        }
+
+        TopicData topicData = new TopicData(
+                topic.getTopicId(),
+                topic.getTitle(),
+                topic.getMessage(),
+                topic.getCourse(),
+                topic.getCreatedAt().toString(),
+                topic.getUser().getUsername()
+        );
+
+        return ResponseEntity.ok(topicData);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateTopic(@PathVariable("id") Long id, @RequestBody @Valid TopicRegisterData topicRegisterData, Authentication authentication) {
+        String username = authentication.getName();
+
+        UserDetails loggedInUser = userRepository.findByUsername(username);
+        if (loggedInUser == null) {
+            return ResponseEntity.status(403).body("User not found or unauthorized");
+        }
+
+        Topic topic = topicRepository.findById(id).orElse(null);
+        if (topic == null) {
+            return ResponseEntity.status(404).body("Topic not found");
+        }
+
+        System.out.println(username);
+        System.out.println(topic.getUser().getUsername());
+        if (!topic.getUser().getUsername().equals(username)) {
+            return ResponseEntity.status(403).body("User not authorized to update this topic");
+        }
+
+        topic.setTitle(topicRegisterData.title());
+        topic.setMessage(topicRegisterData.message());
+        topic.setCourse(topicRegisterData.course());
+        topicRepository.save(topic);
+        return ResponseEntity.ok("Topic successfully updated");
+    }
 }
